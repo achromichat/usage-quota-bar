@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Usage Quota Bar — live demo</title>
+<style>
+  :root{
+    --bg:#0b0c0f;--panel:#14161c;--panel2:#101217;--line:rgba(255,255,255,.08);
+    --ink:#e8eaf0;--mut:#8b91a3;--faint:#5a6072;
+    --green:#46d27e;--amber:#f5c043;--red:#f76d6d;--blue:#6ea8ff;
+    --display:"Futura","Century Gothic","Gill Sans","Gill Sans MT",sans-serif;
+    --body:"Avenir Next","Avenir",-apple-system,BlinkMacSystemFont,sans-serif;
+    --mono:"SF Mono","Menlo","Monaco",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box}html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased;line-height:1.5;
+    background-image:radial-gradient(900px 520px at 80% -8%,rgba(70,210,126,.10),transparent 60%),
+      radial-gradient(700px 480px at 6% 0%,rgba(110,168,255,.07),transparent 55%),
+      linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+    background-size:auto,auto,46px 46px,46px 46px;background-position:0 0,0 0,-1px -1px,-1px -1px}
+  .wrap{max-width:980px;margin:0 auto;padding:42px 24px 90px}
+  .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--mut);display:flex;align-items:center;gap:9px}
+  .kicker .pulse{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2.4s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(70,210,126,.5)}70%{box-shadow:0 0 0 9px rgba(70,210,126,0)}100%{box-shadow:0 0 0 0 rgba(70,210,126,0)}}
+  h1{font-family:var(--display);font-weight:500;letter-spacing:.02em;font-size:clamp(30px,5vw,52px);margin:.26em 0 .12em;line-height:1.02}
+  h1 em{font-style:normal;color:var(--green)}
+  .lede{color:var(--mut);max-width:70ch;font-size:15.5px}.lede b{color:var(--ink);font-weight:600}
+  a{color:var(--green)}
+
+  /* the big simulated status bar */
+  .stage{margin:26px 0 14px;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 26px 60px -34px rgba(0,0,0,.9)}
+  .editorhint{display:flex;align-items:center;gap:7px;padding:9px 14px;font-family:var(--mono);font-size:11px;color:var(--faint);background:#0e1014;border-bottom:1px solid var(--line)}
+  .editorhint b{color:var(--mut);font-weight:500}
+  .sbar{display:flex;justify-content:flex-end;align-items:center;height:30px;padding:0 12px;font-family:var(--mono);font-size:13px;white-space:nowrap;letter-spacing:.01em}
+  .sbitem{padding:0 9px;display:inline-flex;align-items:center;height:22px;border-radius:4px;cursor:default}
+  .sbitem:hover{background:rgba(127,127,127,.18)}
+  .divider{width:1px;height:15px;margin:0 3px;background:currentColor;opacity:.22}
+  .sbar.dark{background:#181a1f;color:#cfd3dc}.sbar.light{background:#f3f3f3;color:#3b3b3b}.sbar.hc{background:#fff;color:#000}
+  .sbar.hc .divider{opacity:.5}
+  .c-green{color:var(--green)}.c-amber{color:var(--amber)}.c-red{color:var(--red)}
+  .sbar.light .c-green{color:#1a8c4a}.sbar.light .c-amber{color:#9a6b00}.sbar.light .c-red{color:#c0392b}
+  .sub{opacity:.55}
+  .hcnote{font-size:12px;color:var(--faint);margin:0 0 22px}
+
+  /* why panel */
+  .why{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 26px}
+  @media(max-width:640px){.why{grid-template-columns:1fr}}
+  .wcard{border:1px solid var(--line);border-radius:11px;padding:12px 14px;background:linear-gradient(180deg,var(--panel),var(--panel2))}
+  .wcard .wh{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:9px}
+  .wrow{display:flex;align-items:center;gap:9px;font-size:13px;margin:5px 0}
+  .pill{font-family:var(--mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:20px;border:1px solid var(--line);color:var(--faint);white-space:nowrap}
+  .pill.show{color:var(--green);border-color:rgba(70,210,126,.4)}
+  .wrow .lab{font-family:var(--mono);width:30px;color:var(--mut)}
+  .wrow .rsn{color:var(--mut)}.wrow .rsn b{color:var(--ink)}
+
+  /* controls */
+  .deck{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,rgba(20,22,28,.7),rgba(16,18,23,.7));padding:6px 4px}
+  .deck-top{display:flex;flex-wrap:wrap;gap:16px 24px;padding:14px 18px 6px;align-items:flex-end}
+  .deck h3{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--faint);margin:0 0 9px}
+  .seg{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+  .seg button{font:13px var(--body);color:var(--mut);background:transparent;border:0;padding:8px 13px;cursor:pointer}
+  .seg button+button{border-left:1px solid var(--line)}.seg button.on{background:var(--ink);color:#0b0c0f;font-weight:600}
+  .floor{display:flex;align-items:center;gap:10px}.floor input{width:96px}.floor .v{font-family:var(--mono);font-size:12px;color:var(--ink)}
+  .btns{display:flex;gap:7px;flex-wrap:wrap}
+  .btn{font:12.5px var(--body);color:var(--ink);background:#1b1e26;border:1px solid var(--line);border-radius:9px;padding:8px 11px;cursor:pointer;transition:.15s}
+  .btn:hover{border-color:var(--green);color:var(--green)}
+  .sgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px 26px;padding:10px 18px 14px;border-top:1px solid var(--line);margin-top:6px}
+  @media(max-width:640px){.sgrid{grid-template-columns:1fr}}
+  .sgh{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--blue);margin:0 0 7px}
+  .sld{display:grid;grid-template-columns:56px 1fr 50px;align-items:center;gap:10px;margin-bottom:5px}
+  .sld label{font-size:12px;color:var(--mut)}.sld .v{font-family:var(--mono);font-size:12px;text-align:right;color:var(--ink)}
+  input[type=range]{-webkit-appearance:none;width:100%;height:4px;border-radius:3px;background:#2a2e39;outline:0}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--ink);cursor:pointer;border:3px solid #0b0c0f;box-shadow:0 0 0 1px var(--line)}
+  input.rev::-webkit-slider-thumb{background:var(--green)}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;margin:20px 0 0;font-size:12.5px;color:var(--mut)}.legend b{color:var(--ink)}
+  footer{margin-top:30px;color:var(--faint);font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker"><span class="pulse"></span>Usage Quota Bar · live demo</div>
+  <h1>See how it <em>behaves</em></h1>
+  <p class="lede">This is exactly what the extension shows in your VS Code status bar. It’s <b>quiet until it matters</b>: each provider is one item that’s just a coloured dot when you’re fine, and reveals a window’s numbers only when that window is worth knowing. Drag the sliders (or hit a demo button) and watch the <b>“why”</b> panel explain every change. <a href="https://github.com/achromichat/usage-quota-bar">← back to the repo</a></p>
+
+  <div class="stage">
+    <div class="editorhint"><b>VS Code</b> · status bar (bottom-right) · hover an item for exact reset times</div>
+    <div class="sbar dark" id="sbar"></div>
+  </div>
+  <p class="hcnote" id="hcnote"></p>
+
+  <div class="why" id="why"></div>
+
+  <div class="deck">
+    <div class="deck-top">
+      <div><h3>Theme</h3><div class="seg" id="theme">
+        <button data-t="dark" class="on">Dark</button><button data-t="light">Light</button><button data-t="hc">High Contrast</button></div></div>
+      <div><h3>5h floor</h3><div class="floor"><input class="rev" type="range" min="0" max="100" value="50" data-k="rev"><span class="v" data-v="rev">50%</span></div></div>
+      <div><h3>Try a scenario</h3><div class="btns">
+        <button class="btn" id="burn">▶ Burn 5h</button><button class="btn" id="busy">▶ Busy week</button><button class="btn" id="lazy">▶ Lazy week</button><button class="btn" id="reset">Reset</button></div></div>
+    </div>
+    <div class="sgrid" id="sliders">
+      <div><div class="sgh">Claude</div>
+        <div class="sld"><label>5h %</label><input type="range" min="0" max="100" value="82" data-k="c5"><span class="v" data-v="c5">82%</span></div>
+        <div class="sld"><label>5h in</label><input type="range" min="0" max="5" step="0.25" value="4" data-k="c5t"><span class="v" data-v="c5t">4h</span></div>
+        <div class="sld"><label>7d %</label><input type="range" min="0" max="100" value="95" data-k="c7"><span class="v" data-v="c7">95%</span></div>
+        <div class="sld"><label>7d in</label><input type="range" min="0" max="7" step="0.5" value="5" data-k="c7t"><span class="v" data-v="c7t">5d</span></div>
+      </div>
+      <div><div class="sgh">Codex</div>
+        <div class="sld"><label>5h %</label><input type="range" min="0" max="100" value="22" data-k="x5"><span class="v" data-v="x5">22%</span></div>
+        <div class="sld"><label>5h in</label><input type="range" min="0" max="5" step="0.25" value="3.5" data-k="x5t"><span class="v" data-v="x5t">3h30m</span></div>
+        <div class="sld"><label>7d %</label><input type="range" min="0" max="100" value="88" data-k="x7"><span class="v" data-v="x7">88%</span></div>
+        <div class="sld"><label>7d in</label><input type="range" min="0" max="7" step="0.5" value="2" data-k="x7t"><span class="v" data-v="x7t">2d</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span>⏱ <b>5h</b> session window</span><span>🗓 <b>7d</b> weekly window</span>
+    <span>dot = worse window: <span class="c-green">🟢 &gt;30</span> · <span class="c-amber">🟡 ≤30</span> · <span class="c-red">🔴 ≤10</span></span>
+  </div>
+
+  <footer>
+    Mirrors the real extension’s logic exactly (linear pace model). Install:
+    grab the <a href="https://github.com/achromichat/usage-quota-bar/releases">latest .vsix</a> →
+    VS Code → <em>Install from VSIX…</em>
+  </footer>
+</div>
+
+<script>
+const state={c5:82,c5t:4,c7:95,c7t:5, x5:22,x5t:3.5,x7:88,x7t:2, rev:50};
+let theme='dark';
+const CLOCK='⏱', CAL='🗓';
+function dotFor(p){return p==null?'⚪':p<=10?'🔴':p<=30?'🟡':'🟢';}
+function clsFor(p){return p<=10?'c-red':p<=30?'c-amber':'c-green';}
+const colorOK=()=>theme!=='hc';
+function col(p,s){return colorOK()?`<span class="${clsFor(p)}">${s}</span>`:s;}
+const R=Math.round;
+function hrStr(h){const m=R(h*60),hh=Math.floor(m/60),mm=m%60;return hh>=1?(mm>0?`${hh}h${mm}m`:`${hh}h`):`${mm}m`;}
+function dStr(d){return d>=1?`${R(d)}d`:`${R(d*24)}h`;}
+function paceLine(tl,win){if(!win||win<=0)return null;return Math.max(0,Math.min(100,tl/win*100));}
+
+// EXACT mirror of lib.js reveal rules + a human reason for the "why" panel
+function reason5(rem,tl){const line=paceLine(tl,5);
+  if(rem<=state.rev) return {show:true, why:`at/below the ${state.rev}% floor`};
+  if(line!=null && rem<line-12) return {show:true, why:`burning faster than pace (line ~${R(line)}%)`};
+  return {show:false, why:`on track — quiet`};}
+function reason7(rem,tl){const line=paceLine(tl,7), frac=tl/7;
+  if(line!=null && rem<line-15) return {show:true, why:`burning too fast for the week (line ~${R(line)}%)`};
+  if(frac<=2/7 && rem>=50) return {show:true, why:`surplus — lots left, resets soon → use it`};
+  if(rem<=25) return {show:true, why:`low weekly headroom`};
+  return {show:false, why:`on track — quiet`};}
+
+function clk(hoursFromNow){const d=new Date(Date.now()+hoursFromNow*3600*1000);return d.toLocaleString(undefined,{weekday:'short',hour:'numeric',minute:'2-digit'}).replace(',','');}
+
+function providerHTML(name,h5,h5t,h7,h7t){
+  const worst=Math.min(h5,h7);
+  const r5=reason5(h5,h5t), r7=reason7(h7,h7t);
+  const parts=[`${dotFor(worst)} ${name}`];
+  if(r5.show) parts.push(`${CLOCK} ${col(h5,R(h5)+'%')} <span class="sub">(${hrStr(h5t)})</span>`);
+  if(r7.show) parts.push(`${CAL} ${col(h7,R(h7)+'%')} <span class="sub">(${dStr(h7t)})</span>`);
+  const tip=`${name}\n⏱ 5h: ${R(h5)}% left · resets ${clk(h5t)} (in ${hrStr(h5t)})\n🗓 Weekly resets ${clk(h7t*24)} (${R(h7)}% left)`;
+  return {html:`<span class="sbitem" title="${tip}">${parts.join('&nbsp;&nbsp;')}</span>`, r5, r7};
+}
+
+function render(){
+  const c=providerHTML('Claude',state.c5,state.c5t,state.c7,state.c7t);
+  const x=providerHTML('Codex',state.x5,state.x5t,state.x7,state.x7t);
+  document.getElementById('sbar').className='sbar '+theme;
+  document.getElementById('sbar').innerHTML=c.html+'<span class="divider"></span>'+x.html;
+  document.getElementById('hcnote').innerHTML = theme==='hc'
+    ? '⚠ High Contrast themes drop custom text colour — that’s why the % isn’t coloured here. The emoji dots & icons still carry the signal (this is honest: it’s how it really looks in HC).'
+    : 'Tip: switch to <b>High Contrast</b> to see how it looks when VS Code suppresses text colour — the dots still work.';
+  const row=(lab,r)=>`<div class="wrow"><span class="lab">${lab}</span><span class="pill ${r.show?'show':''}">${r.show?'shown':'hidden'}</span><span class="rsn">${r.why}</span></div>`;
+  document.getElementById('why').innerHTML=
+    `<div class="wcard"><div class="wh">Claude — why</div>${row('⏱5h',c.r5)}${row('🗓7d',c.r7)}</div>`+
+    `<div class="wcard"><div class="wh">Codex — why</div>${row('⏱5h',x.r5)}${row('🗓7d',x.r7)}</div>`;
+}
+render();
+
+document.querySelectorAll('#theme button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#theme button').forEach(x=>x.classList.remove('on'));b.classList.add('on');theme=b.dataset.t;render();});
+function fmt(k,v){if(k.endsWith('5t'))return hrStr(v);if(k.endsWith('7t'))return dStr(v);return R(v)+'%';}
+document.querySelectorAll('#sliders input,.rev').forEach(inp=>inp.oninput=()=>{state[inp.dataset.k]=+inp.value;
+  document.querySelector(`[data-v="${inp.dataset.k}"]`).textContent=fmt(inp.dataset.k,+inp.value);render();});
+
+let timer=null;
+function stopAll(){if(timer){clearInterval(timer);timer=null;}const m={burn:'▶ Burn 5h',busy:'▶ Busy week',lazy:'▶ Lazy week'};['burn','busy','lazy'].forEach(id=>document.getElementById(id).textContent=m[id]);}
+function sync(){document.querySelectorAll('#sliders input').forEach(inp=>{inp.value=state[inp.dataset.k];document.querySelector(`[data-v="${inp.dataset.k}"]`).textContent=fmt(inp.dataset.k,state[inp.dataset.k]);});render();}
+function run(id,tick){const btn=document.getElementById(id);const mine=btn.textContent[0]==='⏸';stopAll();if(mine)return;btn.textContent='⏸ Pause';timer=setInterval(()=>{if(!tick())stopAll();sync();},150);}
+document.getElementById('burn').onclick=()=>run('burn',()=>{let a=false;[['c5','c5t'],['x5','x5t']].forEach(([p,t])=>{if(state[p]>0){state[p]=Math.max(0,state[p]-3);a=true;}if(state[t]>0)state[t]=Math.max(0,state[t]-0.08);});return a;});
+document.getElementById('busy').onclick=()=>run('busy',()=>{let a=false;[['c7','c7t'],['x7','x7t']].forEach(([p,t])=>{if(state[p]>0){state[p]=Math.max(0,state[p]-2.4);a=true;}if(state[t]>0)state[t]=Math.max(0,state[t]-0.16);});return a;});
+document.getElementById('lazy').onclick=()=>run('lazy',()=>{let a=false;[['c7','c7t'],['x7','x7t']].forEach(([p,t])=>{if(state[t]>0){state[t]=Math.max(0,state[t]-0.22);a=true;}if(state[p]>0)state[p]=Math.max(0,state[p]-0.25);});return a;});
+document.getElementById('reset').onclick=()=>{stopAll();Object.assign(state,{c5:82,c5t:4,c7:95,c7t:5,x5:22,x5t:3.5,x7:88,x7t:2,rev:50});sync();};
+</script>
+</body>
+</html>

@@ -15,6 +15,12 @@ worth knowing:   🟢 Claude            🟡 Codex  ⏱ 12% (4h19m)  🗓 84% (6
 - **Dot** = the worse of the two windows: 🟢 >30% · 🟡 ≤30% · 🔴 ≤10% remaining.
 - **Hover** a provider for exact resets, e.g. `Weekly resets Fri 12:59 PM`.
 
+### ▶ Try it live (no install)
+
+**[Open the interactive demo →](https://achromichat.github.io/usage-quota-bar/)** — drag
+the sliders and watch the status bar react, with a panel that explains *why* each
+window shows or hides. (Mirrors the real logic exactly.)
+
 ### When does a window appear? (pace-aware)
 
 It stays hidden while you're on track, and reveals when:
