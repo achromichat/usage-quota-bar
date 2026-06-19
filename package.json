@@ -1,0 +1,46 @@
+{
+  "name": "usage-quota-bar",
+  "displayName": "Usage Quota Bar (Claude + Codex)",
+  "description": "Quiet, pace-aware subscription quota (5h + 7d windows) for Claude Code and Codex in the VS Code status bar. Remaining %, not dollars.",
+  "version": "1.1.0",
+  "publisher": "achromichat",
+  "license": "MIT",
+  "engines": { "vscode": "^1.74.0" },
+  "categories": ["Other"],
+  "keywords": ["claude", "codex", "usage", "quota", "rate limit", "status bar"],
+  "repository": { "type": "git", "url": "https://github.com/achromichat/usage-quota-bar.git" },
+  "bugs": { "url": "https://github.com/achromichat/usage-quota-bar/issues" },
+  "homepage": "https://github.com/achromichat/usage-quota-bar#readme",
+  "extensionKind": ["ui"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./extension.js",
+  "scripts": {
+    "test": "node test/lib.test.js"
+  },
+  "contributes": {
+    "commands": [
+      { "command": "usageQuotaBar.refresh", "title": "Usage Quota Bar: Refresh Now" }
+    ],
+    "configuration": {
+      "title": "Usage Quota Bar",
+      "properties": {
+        "usageQuotaBar.refreshSeconds": {
+          "type": "number", "default": 60, "minimum": 15,
+          "description": "How often to refresh quota, in seconds."
+        },
+        "usageQuotaBar.fiveFloor": {
+          "type": "number", "default": 50, "minimum": 0, "maximum": 100,
+          "description": "5h window reveals at/below this remaining %% (it also reveals earlier if you're burning faster than pace)."
+        },
+        "usageQuotaBar.showClaude": {
+          "type": "boolean", "default": true,
+          "description": "Show the Claude Code item."
+        },
+        "usageQuotaBar.showCodex": {
+          "type": "boolean", "default": true,
+          "description": "Show the Codex item."
+        }
+      }
+    }
+  }
+}
