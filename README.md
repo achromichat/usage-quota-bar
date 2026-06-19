@@ -2,9 +2,9 @@
 
 A tiny VS Code status-bar indicator for your **Claude Code** and **Codex**
 **subscription** quota — the rolling **5-hour** and **7-day** windows — shown as
-**% remaining** (never dollars or tokens). It's *quiet until it matters*: each
+**% remaining**. It's *quiet until it matters*: each
 provider is one item that shows just a colored dot when you're fine, and speaks up
-only when a window is worth knowing about.
+only when a window is worth knowing about - either you're using your plan too quickly or your usage is low (regardless of time left in the window)
 
 ```
 on track:        🟢 Claude            🟢 Codex
