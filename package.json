@@ -2,7 +2,7 @@
   "name": "usage-quota-bar",
   "displayName": "Usage Quota Bar (Claude + Codex)",
   "description": "Quiet, pace-aware subscription quota (5h + 7d windows) for Claude Code and Codex in the VS Code status bar. Remaining %, not dollars.",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "publisher": "achromichat",
   "license": "MIT",
   "engines": { "vscode": "^1.74.0" },
@@ -15,7 +15,7 @@
   "activationEvents": ["onStartupFinished"],
   "main": "./extension.js",
   "scripts": {
-    "test": "node test/lib.test.js"
+    "test": "node test/lib.test.js && node test/refresh.test.js"
   },
   "contributes": {
     "commands": [
